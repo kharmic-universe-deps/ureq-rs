@@ -41,11 +41,13 @@ See the [changelog] for details of recent releases.
 In its simplest form, ureq looks like this:
 
 ```rust
-let body: String = ureq::get("http://example.com")
+fn no_run(){
+    let body: String = ureq::get("http://example.com")
     .header("Example-Header", "header value")
     .call()?
     .body_mut()
     .read_to_string()?;
+}
 ```
 
 For more involved tasks, you'll want to create an [`Agent`]. An Agent
@@ -58,23 +60,25 @@ an Agent also allows setting options like the TLS configuration.
 use ureq::Agent;
 use std::time::Duration;
 
-let mut config = Agent::config_builder()
+fn no_run() { 
+    let mut config = Agent::config_builder()
     .timeout_global(Some(Duration::from_secs(5)))
     .build();
-
-let agent: Agent = config.into();
-
-let body: String = agent.get("http://example.com/page")
-    .call()?
+    
+    let agent: Agent = config.into();
+    
+    let body: String = agent.get("http://example.com/page")
+    .call() ?
     .body_mut()
-    .read_to_string()?;
-
-// Reuses the connection from previous request.
-let response: String = agent.put("http://example.com/upload")
+    .read_to_string() ?;
+    
+    // Reuses the connection from previous request.
+    let response: String = agent.put("http://example.com/upload")
     .header("Authorization", "example-token")
-    .send("some body data")?
+    .send("some body data") ?
     .body_mut()
-    .read_to_string()?;
+    .read_to_string() ?;
+}
 ```
 
 ### JSON
@@ -94,14 +98,15 @@ struct MyRecvBody {
    other: String,
 }
 
-let send_body = MySendBody { thing: "yo".to_string() };
-
-// Requires the `json` feature enabled.
-let recv_body = ureq::post("http://example.com/post/ingest")
+fn no_run() {
+    let send_body = MySendBody { thing: "yo".to_string() };
+    // Requires the `json` feature enabled.
+    let recv_body = ureq::post("http://example.com/post/ingest")
     .header("X-My-Header", "Secret")
-    .send_json(&send_body)?
+    .send_json(& send_body) ?
     .body_mut()
-    .read_json::<MyRecvBody>()?;
+    .read_json::< MyRecvBody > () ?;
+}
 ```
 
 ### Error handling
@@ -115,13 +120,15 @@ This behavior can be turned off via [`http_status_as_error()`]
 ```rust
 use ureq::Error;
 
-match ureq::get("http://mypage.example.com/").call() {
-    Ok(response) => { /* it worked */},
-    Err(Error::StatusCode(code)) => {
-        /* the server returned an unexpected status
-           code (such as 400, 500 etc) */
+fn no_run() {
+    match ureq::get("http://mypage.example.com/").call() {
+        Ok(response) => { /* it worked */},
+        Err(Error::StatusCode(code)) => {
+            /* the server returned an unexpected status
+               code (such as 400, 500 etc) */
+        }
+        Err(_) => { /* some kind of io/transport/etc error */ }
     }
-    Err(_) => { /* some kind of io/transport/etc error */ }
 }
 ```
 
@@ -175,7 +182,9 @@ work, but the specific crypto backend might change in a minor version.
 
 ```rust
 // This uses rustls
-ureq::get("https://www.google.com/").call().unwrap();
+fn no_run() {
+    ureq::get("https://www.google.com/").call().unwrap(); 
+}
 ```
 
 #### rustls without ring
@@ -200,18 +209,20 @@ must be configured on the agent.
 use ureq::config::Config;
 use ureq::tls::{TlsConfig, TlsProvider};
 
-let mut config = Config::builder()
+fn no_run(){
+    let mut config = Config::builder()
     .tls_config(
-        TlsConfig::builder()
-            // requires the native-tls feature
-            .provider(TlsProvider::NativeTls)
-            .build()
+    TlsConfig::builder()
+    // requires the native-tls feature
+    .provider(TlsProvider::NativeTls)
+    .build()
     )
     .build();
-
-let agent = config.new_agent();
-
-agent.get("https://www.google.com/").call().unwrap();
+    
+    let agent = config.new_agent();
+    
+    agent.get("https://www.google.com/").call().unwrap();
+}
 ```
 
 ### Root certificates
@@ -241,16 +252,18 @@ configure an agent to use it.
 use ureq::Agent;
 use ureq::tls::{TlsConfig, RootCerts};
 
-let agent = Agent::config_builder()
+fn no_run() {
+    let agent = Agent::config_builder()
     .tls_config(
-        TlsConfig::builder()
-            .root_certs(RootCerts::PlatformVerifier)
-            .build()
+    TlsConfig::builder()
+    .root_certs(RootCerts::PlatformVerifier)
+    .build()
     )
     .build()
     .new_agent();
-
-let response = agent.get("https://httpbin.org/get").call()?;
+    
+    let response = agent.get("https://httpbin.org/get").call()?;
+}
 ```
 
 Setting `RootCerts::PlatformVerifier` together with `TlsProvider::NativeTls` means
@@ -333,9 +346,11 @@ sending the body, ureq will respect that header by not overriding it,
 and by encoding the body or not, as indicated by the headers you set.
 
 ```rust
-let resp = ureq::put("https://httpbin.org/put")
+fn no_run() {
+    let resp = ureq::put("https://httpbin.org/put")
     .header("Transfer-Encoding", "chunked")
-    .send("Hello world")?;
+    .send("Hello world") ?;
+}
 ```
 
 ## Character encoding
@@ -377,14 +392,15 @@ Proxies settings are configured on an [`Agent`]. All request sent through the ag
 ```rust
 use ureq::{Agent, Proxy};
 // Configure an http connect proxy.
-let proxy = Proxy::new("http://user:password@cool.proxy:9090")?;
-let agent: Agent = Agent::config_builder()
+fn no_run(){
+    let proxy = Proxy::new("http://user:password@cool.proxy:9090") ?;
+    let agent: Agent = Agent::config_builder()
     .proxy(Some(proxy))
     .build()
     .into();
-
-// This is proxied.
-let resp = agent.get("http://cool.server").call()?;
+    // This is proxied.
+    let resp = agent.get("http://cool.server").call() ?;
+}
 ```
 
 ### Example using SOCKS5
@@ -392,14 +408,15 @@ let resp = agent.get("http://cool.server").call()?;
 ```rust
 use ureq::{Agent, Proxy};
 // Configure a SOCKS proxy.
-let proxy = Proxy::new("socks5://user:password@cool.proxy:9090")?;
-let agent: Agent = Agent::config_builder()
+fn no_run(){
+    let proxy = Proxy::new("socks5://user:password@cool.proxy:9090") ?;
+    let agent: Agent = Agent::config_builder()
     .proxy(Some(proxy))
     .build()
     .into();
-
-// This is proxied.
-let resp = agent.get("http://cool.server").call()?;
+    // This is proxied.
+    let resp = agent.get("http://cool.server").call() ?;
+}
 ```
 
 ## Log levels

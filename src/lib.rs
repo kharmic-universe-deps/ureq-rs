@@ -37,12 +37,13 @@
 //! In its simplest form, ureq looks like this:
 //!
 //! ```rust
+//! # fn no_run() -> Result<(), ureq::Error> {
 //! let body: String = ureq::get("http://example.com")
 //!     .header("Example-Header", "header value")
 //!     .call()?
 //!     .body_mut()
 //!     .read_to_string()?;
-//! # Ok::<(), ureq::Error>(())
+//! # Ok::<(), ureq::Error>(())}
 //! ```
 //!
 //! For more involved tasks, you'll want to create an [`Agent`]. An Agent

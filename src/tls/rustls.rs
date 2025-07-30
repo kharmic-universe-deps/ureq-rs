@@ -131,14 +131,17 @@ fn build_config(tls_config: &TlsConfig) -> CachedRustlConfig {
         .rustls_crypto_provider
         .clone()
         .or(rustls::crypto::CryptoProvider::get_default().cloned())
-        .unwrap_or_else(ring_if_enabled);
+        .unwrap_or_else(awslc_if_enabled);
 
+    fn awslc_if_enabled() -> Arc<CryptoProvider> {
+        Arc::new(rustls::crypto::aws_lc_rs::default_provider())
+    }
     #[cfg(feature = "_ring")]
     fn ring_if_enabled() -> Arc<CryptoProvider> {
         Arc::new(rustls::crypto::ring::default_provider())
     }
 
-    #[cfg(not(feature = "_ring"))]
+    //#[cfg(not(feature = "_ring"))]
     fn ring_if_enabled() -> Arc<CryptoProvider> {
         panic!(
             "No CryptoProvider for Rustls. Either enable feature `rustls`, or set process
